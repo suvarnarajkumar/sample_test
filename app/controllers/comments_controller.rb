@@ -27,6 +27,7 @@ class CommentsController < ApplicationController
       user_ids << current_user.parent_user.id
       current_user.parent_user.users.each {|user| user_ids << user.id }
     else
+      user_ids << current_user.id
       current_user.users.each {|user| user_ids << user.id }
     end
 
@@ -41,11 +42,11 @@ class CommentsController < ApplicationController
       user_ids << current_user.parent_user.id
       current_user.parent_user.users.each {|user| user_ids << user.id }
     else
+      user_ids << current_user.id
       current_user.users.each {|user| user_ids << user.id }
     end
 
     @posts = Post.where(user_id: user_ids)
-    @post = Post.find_by(@comment.post_id)
   end
 
   # POST /comments
@@ -56,6 +57,15 @@ class CommentsController < ApplicationController
 
     respond_to do |format|
       if @comment.save
+        user_emails = []
+        if current_user.parent_user.present?
+          user_emails << current_user.parent_user.email
+          current_user.parent_user.users.each {|user| user_emails << user.email }
+        else
+          user_emails << current_user.email
+          current_user.users.each {|user| user_emails << user.email }
+        end
+        TestMailer.comment_email(user_emails, 'New Comment added....').deliver
         format.html { redirect_to @comment, notice: 'Comment was successfully created.' }
         format.json { render :show, status: :created, location: @comment }
       else
@@ -71,6 +81,15 @@ class CommentsController < ApplicationController
     respond_to do |format|
       if @comment.update(comment_params)
         @comment.update(post_id: params[:post_id])
+        user_emails = []
+        if current_user.parent_user.present?
+          user_emails << current_user.parent_user.email
+          current_user.parent_user.users.each {|user| user_emails << user.email }
+        else
+          user_emails << current_user.email
+          current_user.users.each {|user| user_emails << user.email }
+        end
+        TestMailer.comment_email(user_emails, 'Comment edited, please check...').deliver
         format.html { redirect_to @comment, notice: 'Comment was successfully updated.' }
         format.json { render :show, status: :ok, location: @comment }
       else

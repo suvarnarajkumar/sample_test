@@ -43,6 +43,15 @@ class PostsController < ApplicationController
     @post = current_user.posts.new(post_params)
     respond_to do |format|
       if @post.save
+        user_emails = []
+        if current_user.parent_user.present?
+          user_emails << current_user.parent_user.email
+          current_user.parent_user.users.each {|user| user_emails << user.email }
+        else
+          user_emails << current_user.email
+          current_user.users.each {|user| user_emails << user.email }
+        end
+        TestMailer.post_email(user_emails, 'New Post created....').deliver
         format.html { redirect_to @post, notice: 'Post was successfully created.' }
         format.json { render :show, status: :created, location: @post }
       else
@@ -57,6 +66,15 @@ class PostsController < ApplicationController
   def update
     respond_to do |format|
       if @post.update(post_params)
+        user_emails = []
+        if current_user.parent_user.present?
+          user_emails << current_user.parent_user.email
+          current_user.parent_user.users.each {|user| user_emails << user.email }
+        else
+          user_emails << current_user.email
+          current_user.users.each {|user| user_emails << user.email }
+        end
+        TestMailer.post_email(user_emails, 'Post edited, please check...').deliver
         format.html { redirect_to @post, notice: 'Post was successfully updated.' }
         format.json { render :show, status: :ok, location: @post }
       else
