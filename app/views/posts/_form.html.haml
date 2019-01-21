@@ -1,0 +1,15 @@
+= form_for @post, html: { class: "form form-horizontal post", style: "width:50%;" } do |f|
+  .form-group
+    = f.label :title, class: 'control-label col-lg-2'
+    .col-lg-10
+      = f.text_field :title, class: 'form-control', required: true
+    = f.error_span(:title)
+  .form-group
+    = f.label :body, class: 'control-label col-lg-2'
+    .col-lg-10
+      = f.text_field :body, class: 'form-control', required: true
+    = f.error_span(:body)
+  .form-group
+    .col-lg-offset-2.col-lg-10
+      = f.submit nil,class: 'btn btn-primary'
+      = link_to t('.cancel', :default => t("helpers.links.cancel")), posts_path, :class => 'btn btn-default'
